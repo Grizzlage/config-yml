@@ -4,7 +4,6 @@ const head = require('lodash/fp/head')
 const pick = require('lodash/fp/pick')
 const keys = require('lodash/fp/keys')
 const fs = require('fs')
-const sh = require('shelljs')
 const yaml = require('js-yaml')
 const moment = require('moment')
 const args = require('yargs').argv
@@ -56,22 +55,6 @@ function loadConfig () {
   }
 }
 
-function getEnvIdFromBranch () {
-  try {
-    let branch = sh.exec('git name-rev HEAD --name-only', {silent: true}).stdout
-
-    branch = _.last(_.split(branch, '/'))
-
-    return _.trimEnd(_.truncate(branch, {
-      length: 13,
-      omission: ''
-    }), '-').replace(/(\r\n|\n|\r)/gm, '')
-  } catch (e) {
-    console.log('ERR: ', e)
-    // Do nothing
-  }
-}
-
 function getEnvId (obj, env) {
   return env ||
         args.env ||
@@ -80,8 +63,7 @@ function getEnvId (obj, env) {
           keys,
           head
         )(args) ||
-        process.env.ENVIRONMENT_ID ||
-        getEnvIdFromBranch()
+        process.env.ENVIRONMENT_ID
 }
 
 function substitute (file, p) {
